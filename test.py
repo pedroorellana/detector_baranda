@@ -1,28 +1,40 @@
 import numpy as np
 import cv2
 import copy as copy
+import time
+import imutils
+
+
 
 
 #cap = cv2.VideoCapture(0)
 cap = cv2.VideoCapture('data/sample_2.mp4')
-import copy as copy
+width = int( cap.get(cv2.CAP_PROP_FRAME_WIDTH ) )
+height = int( cap.get(cv2.CAP_PROP_FRAME_HEIGHT ) )
+fps =  int( cap.get(cv2.CAP_PROP_FPS) )
+print(width)
+
+
+
 #BackSubs = cv2.createBackgroundSubtractorKNN(dist2Threshold = 400) #objeto modelo fondoself.
-BackSubs = cv2.createBackgroundSubtractorMOG2(history = 60,
-                                             varThreshold = 20) #objeto modelo fondoself.
+#BackSubs = cv2.createBackgroundSubtractorMOG2(history = 60,
+#                                             varThreshold = 20) #objeto modelo fondoself.
+
+
+BackSubs = cv2.createBackgroundSubtractorMOG2(history = 240) #objeto modelo fondoself.
 
 
 # BackSubs2 = cv2.createBackgroundSubtractorMOG2()
 #BackSubs = cv2.createBackgroundSubtractorMOG2()
 #BackSubs.setHistory(600)
 #BackSubs.setNSamples(20)
-
 #BackSubs = cv2.createBackgroundSubtractorMOG2()
 #BackSubs = cv2.createBackgroundSubtractorMOG()
 
 
-BackSubs.setShadowValue(255) # blanco
+BackSubs.setShadowValue(0) # blanco
 
-minBlobSize = 5000
+minBlobSize = 2000
 
 def analisisBlobs(imBlobs):
     '''
@@ -75,6 +87,16 @@ sum_detec = 0
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
+    #frame = cv2.rotateImage(frame, 90)
+    
+    # getRotationMatrix2D(  center, angle, scale    )
+    #M = cv2.getRotationMatrix2D(((width-1)/2.0,(height-1)/2.0),-90,0.5)
+    #M = cv2.getRotationMatrix2D((40,500),-70,1)
+    #frame = cv2.warpAffine(frame,M,(height,width))
+    frame = imutils.rotate_bound(frame, 90)
+
+    #time.sleep(0.01)
+
 
     # Our operations on the frame come here
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -86,7 +108,7 @@ while(True):
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(8,8))     #blob mov
     ImErode = cv2.erode(estMov,kernel,iterations = 1)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
-    ImDilate = cv2.dilate(ImErode,kernel,iterations = 2)
+    ImDilate = cv2.dilate(ImErode,kernel,iterations = 1)
     # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(20,20))
     # ImDilate2 = cv2.dilate(ImErode,kernel,iterations = 2)
 
@@ -97,12 +119,15 @@ while(True):
 
     blos = analisisBlobs(ImDilate)
 
+
+    height, width = frame.shape[:2]
+
     line = gray*0
-    a = 0
-    b = 370
-    c = 1000
-    d = 480
-    cv2.line(line,(a,b),(c,d),255,7)
+    x1 = 0.4*width
+    y1 = 00*height
+    x2 = .35*width
+    y2 = 1*height
+    cv2.line(line,(int(x1),int(y1)),(int(x2),int(y2)),255,7)
 
 
     detec = np.logical_and(line, ImDilate)
@@ -111,8 +136,8 @@ while(True):
     
 
 
-
-    if ct == 30:
+    delay = 20 
+    if ct == delay:
         if sum_detec > 0:
             detec_on = True
         else:
@@ -126,15 +151,15 @@ while(True):
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(frame,'Demo Conceptual',(10,25), font, 1,(255,255,255),2,cv2.LINE_AA)
     if sum_detec > 0 :
-        cv2.line(frame,(a,b),(c,d),(0,0,255),7)
+        cv2.line(frame,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),7)
         cv2.putText(frame,'Deteccion mano en baranda',(10,450), font, 0.8,(0,0,255),2,cv2.LINE_AA)
 
 
     if detec_on :
-        cv2.line(frame,(a,b),(c,d),(0,0,255),7)
+        cv2.line(frame,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),7)
         cv2.putText(frame,'Deteccion mano en baranda',(10,450), font, 0.8,(0,0,255),2,cv2.LINE_AA)
     else :
-        cv2.line(frame,(a,b),(c,d),(255,0,0),7)
+        cv2.line(frame,(int(x1),int(y1)),(int(x2),int(y2)),(255,0,0),7)
         #cv2.putText(frame,'No deteccion baranda',(10,450), font, 1,(255,255,255),2,cv2.LINE_AA)
 
 
