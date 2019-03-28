@@ -1,8 +1,8 @@
-import numpy as np
 import cv2
 import copy as copy
 import time
 import imutils
+import numpy as np
 
 
 
@@ -12,16 +12,21 @@ cap = cv2.VideoCapture('data/sample_2.mp4')
 width = int( cap.get(cv2.CAP_PROP_FRAME_WIDTH ) )
 height = int( cap.get(cv2.CAP_PROP_FRAME_HEIGHT ) )
 fps =  int( cap.get(cv2.CAP_PROP_FPS) )
+total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 print(width)
 
+#fourcc = cv2.VideoWriter_fourcc(*'XVID')}
+#out = cv2.VideoWriter('output.avi',fourcc,fps, (height,width))
 
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+out = cv2.VideoWriter('output.mp4',fourcc,fps, (height,width))
 
 #BackSubs = cv2.createBackgroundSubtractorKNN(dist2Threshold = 400) #objeto modelo fondoself.
 #BackSubs = cv2.createBackgroundSubtractorMOG2(history = 60,
 #                                             varThreshold = 20) #objeto modelo fondoself.
 
 
-BackSubs = cv2.createBackgroundSubtractorMOG2(history = 240) #objeto modelo fondoself.
+BackSubs = cv2.createBackgroundSubtractorMOG2(history = 440) #objeto modelo fondoself.
 
 
 # BackSubs2 = cv2.createBackgroundSubtractorMOG2()
@@ -84,7 +89,7 @@ a = 0
 detec_on = False
 sum_detec = 0
 
-while(True):
+for k in range(total_frames-1):
     # Capture frame-by-frame
     ret, frame = cap.read()
     #frame = cv2.rotateImage(frame, 90)
@@ -148,20 +153,21 @@ while(True):
 
     ct =ct+ 1
 
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(frame,'Demo Conceptual',(10,25), font, 1,(255,255,255),2,cv2.LINE_AA)
     if sum_detec > 0 :
         cv2.line(frame,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),7)
-        cv2.putText(frame,'Deteccion mano en baranda',(10,450), font, 0.8,(0,0,255),2,cv2.LINE_AA)
+        cv2.putText(frame,'Deteccion mano en baranda',(10,350), font, 0.7,(0,0,255),1,cv2.LINE_AA)
 
 
     if detec_on :
         cv2.line(frame,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),7)
-        cv2.putText(frame,'Deteccion mano en baranda',(10,450), font, 0.8,(0,0,255),2,cv2.LINE_AA)
+        cv2.putText(frame,'Deteccion mano en baranda',(10,350), font, 0.7,(0,0,255),1,cv2.LINE_AA)
     else :
         cv2.line(frame,(int(x1),int(y1)),(int(x2),int(y2)),(255,0,0),7)
         #cv2.putText(frame,'No deteccion baranda',(10,450), font, 1,(255,255,255),2,cv2.LINE_AA)
 
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(frame,'prueba Concepto',(10,40), font, 0.6,(128,128,255),1,cv2.LINE_AA)
 
     # Display the resulting frame
     #cv2.imshow('grray',gray)
@@ -171,9 +177,13 @@ while(True):
     cv2.imshow('blos',frame)
     #cv2.imshow('line',line*ImDilate*255)
 
+    out.write(frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 # When everything done, release the capture
+print("endok")
 cap.release()
+out.release()
+
 cv2.destroyAllWindows()
